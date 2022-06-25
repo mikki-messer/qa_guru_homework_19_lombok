@@ -5,11 +5,13 @@ import com.mikkimesser.models.UserData;
 import com.mikkimesser.models.UserTiny;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import static com.mikkimesser.Specifications.*;
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
 import static org.hamcrest.collection.IsMapContaining.hasKey;
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -35,6 +37,26 @@ public class ReqresInTests {
         assertThat(userData.getData().getFirstName(), equalTo("Emma"));
         assertThat(userData.getData().getLastName(), equalTo("Wong"));
         assertThat(userData.getData().getEmail(), equalTo("emma.wong@reqres.in"));
+    }
+
+    @ValueSource(strings = {
+            "george.bluth@reqres.in",
+            "janet.weaver@reqres.in",
+            "eve.holt@reqres.in"
+    })
+    @ParameterizedTest(name = "Проверка, что в список пользователей с id < 5 входит пользователь с email {0}")
+    public void checkUserEmailsWithIdBelow5(String expectedEmail){
+        String endpoint = "/users";
+
+        given()
+                .when()
+                .spec(requestSpecification)
+                .get(endpoint)
+                .then()
+                .spec(responseSpecification200)
+                .body("data.findAll{it.id < 5}.email", hasItem(expectedEmail));
+
+
     }
 
     @Test
