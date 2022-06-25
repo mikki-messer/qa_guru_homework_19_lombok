@@ -1,13 +1,17 @@
 package com.mikkimesser;
 
 import com.github.javafaker.Faker;
+import com.mikkimesser.models.UserData;
+import com.mikkimesser.models.UserTiny;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static com.mikkimesser.Specifications.*;
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.collection.IsMapContaining.hasKey;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class ReqresInTests {
 
@@ -16,18 +20,21 @@ public class ReqresInTests {
     @Test
     @DisplayName("Проверка получения данных существующего пользователя по id")
     public void singleUserEmailByIdTest() {
-        String endpoint = "https://reqres.in/api/users/3";
 
-        given()
+        String endpoint = "/users/3";
+
+        UserData userData = given()
                 .when()
+                .spec(requestSpecification)
                 .get(endpoint)
                 .then()
-                .statusCode(200)
-                .body("data.id", is(3))
-                .body("data.first_name", is("Emma"))
-                .body("data.last_name", is("Wong"))
-                .body("data.email", is("emma.wong@reqres.in"))
-        ;
+                .spec(responseSpecification200)
+                .extract().as(UserData.class);
+
+        assertThat(userData.getData().getId(), equalTo(3));
+        assertThat(userData.getData().getFirstName(), equalTo("Emma"));
+        assertThat(userData.getData().getLastName(), equalTo("Wong"));
+        assertThat(userData.getData().getEmail(), equalTo("emma.wong@reqres.in"));
     }
 
     @Test
@@ -56,7 +63,9 @@ public class ReqresInTests {
         String name = faker.name().firstName();
         String job = faker.job().position();
 
-        String payload = String.format("{ \"name\": \"%s\", \"job\": \"%s\" }", name, job);
+        UserTiny payload = new UserTiny();
+        payload.setJob(job);
+        payload.setName(name);
 
         given()
                 .spec(requestSpecification)
@@ -90,17 +99,21 @@ public class ReqresInTests {
         String name = faker.name().firstName();
         String job = faker.job().position();
 
-        String payload = String.format("{ \"name\": \"%s\", \"job\": \"%s\" }", name, job);
+        UserTiny payload = new UserTiny();
+        payload.setJob(job);
+        payload.setName(name);
 
-        given()
+        UserTiny userTiny = given()
                 .spec(requestSpecification)
                 .body(payload)
                 .when()
                 .put(endpoint)
                 .then()
                 .spec(responseSpecification200)
-                .body("name", is(name))
-                .body("job", is(job));
+                .extract().as(UserTiny.class);
+
+        assertThat(userTiny.getName(), equalTo(name));
+        assertThat(userTiny.getJob(), equalTo(job));
     }
 
 }
