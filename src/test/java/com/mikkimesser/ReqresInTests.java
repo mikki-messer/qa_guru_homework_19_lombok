@@ -4,8 +4,8 @@ import com.github.javafaker.Faker;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import static com.mikkimesser.Specifications.*;
 import static io.restassured.RestAssured.given;
-import static io.restassured.http.ContentType.JSON;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.collection.IsMapContaining.hasKey;
 
@@ -33,17 +33,14 @@ public class ReqresInTests {
     @Test
     @DisplayName("Проверка структуры массива data для элемента списка ресурсов")
     public void resourceListTest() {
-        String endpoint = "https://reqres.in/api/unknown";
+        String endpoint = "/unknown";
 
         given()
                 .when()
-                .log().uri()
-                .log().body()
+                .spec(requestSpecification)
                 .get(endpoint)
                 .then()
-                .statusCode(200)
-                .log().status()
-                .log().body()
+                .spec(responseSpecification200)
                 .body("data[0]", hasKey("id"))
                 .body("data[0]", hasKey("year"))
                 .body("data[0]", hasKey("name"))
@@ -54,7 +51,7 @@ public class ReqresInTests {
     @Test
     @DisplayName("Проверка эндпойнта создания пользователя")
     public void createUserTest() {
-        String endpoint = "https://reqres.in/api/user";
+        String endpoint = "/user";
 
         String name = faker.name().firstName();
         String job = faker.job().position();
@@ -62,16 +59,12 @@ public class ReqresInTests {
         String payload = String.format("{ \"name\": \"%s\", \"job\": \"%s\" }", name, job);
 
         given()
-                .log().uri()
-                .log().body()
+                .spec(requestSpecification)
                 .body(payload)
-                .contentType(JSON)
                 .when()
                 .post(endpoint)
                 .then()
-                .statusCode(201)
-                .log().status()
-                .log().body()
+                .spec(responseSpecification201)
                 .body("name", is(name))
                 .body("job", is(job));
     }
@@ -79,10 +72,10 @@ public class ReqresInTests {
     @Test
     @DisplayName("Проверка статуса ответа при удалении пользователя")
     public void deleteUserTest() {
-        String endpoint = "https://reqres.in/api/users/4";
+        String endpoint = "/users/4";
 
         given()
-                .log().uri()
+                .spec(requestSpecification)
                 .when()
                 .delete(endpoint)
                 .then()
@@ -92,7 +85,7 @@ public class ReqresInTests {
     @Test
     @DisplayName("Проверка обновления пользователя с помощью PUT")
     public void updateUserTest() {
-        String endpoint = "https://reqres.in/api/users/4";
+        String endpoint = "/users/4";
 
         String name = faker.name().firstName();
         String job = faker.job().position();
@@ -100,16 +93,12 @@ public class ReqresInTests {
         String payload = String.format("{ \"name\": \"%s\", \"job\": \"%s\" }", name, job);
 
         given()
-                .log().uri()
-                .log().body()
+                .spec(requestSpecification)
                 .body(payload)
-                .contentType(JSON)
                 .when()
                 .put(endpoint)
                 .then()
-                .statusCode(200)
-                .log().status()
-                .log().body()
+                .spec(responseSpecification200)
                 .body("name", is(name))
                 .body("job", is(job));
     }
