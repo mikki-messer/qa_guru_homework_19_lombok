@@ -6,14 +6,13 @@ import com.mikkimesser.models.UserTiny;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import static com.mikkimesser.Specifications.*;
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.collection.IsMapContaining.hasKey;
-import static org.hamcrest.MatcherAssert.assertThat;
 
 public class ReqresInTests {
 
@@ -45,7 +44,7 @@ public class ReqresInTests {
             "eve.holt@reqres.in"
     })
     @ParameterizedTest(name = "Проверка, что в список пользователей с id < 5 входит пользователь с email {0}")
-    public void checkUserEmailsWithIdBelow5(String expectedEmail){
+    public void checkUserEmailsWithIdBelow5(String expectedEmail) {
         String endpoint = "/users";
 
         given()
